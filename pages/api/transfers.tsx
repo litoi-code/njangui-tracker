@@ -1,5 +1,5 @@
 import React from 'react';
-import DatePicker from '../components/DatePicker';
+import DatePicker from '../../components/DatePicker';
 
 const TransfersPage = () => {
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(new Date());

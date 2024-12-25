@@ -40,6 +40,7 @@ interface Transfer {
     }[];
     transferDate: Date;
     status: string;
+    type: string; // Add type field to distinguish between transfer and loan
 }
 
 
@@ -70,7 +71,16 @@ const Transfers: React.FC = () => {
         setSourceAccount(null);
         setRecipientAmounts({});
         setOpenDialog(true);
-        setSelectedRecipient([]);
+        const preselectedRecipients = accounts.filter((account, index) => 
+            (account.accountType === 'savings' && index < 3) || 
+            (account.accountType === 'investment' && index === 0)
+        );
+        setSelectedRecipient(preselectedRecipients);
+        const defaultAmounts: { [accountId: string]: number } = {};
+        if (preselectedRecipients[1] && preselectedRecipients[1].accountType === 'savings') {
+            defaultAmounts[preselectedRecipients[1]._id] = 3500;
+        }
+        setRecipientAmounts(defaultAmounts);
     };
 
     const handleCloseDialog = () => {
@@ -226,11 +236,12 @@ const Transfers: React.FC = () => {
             />
           </div>
             <div>
-              <label htmlFor="account">Select Account:</label>
+              <label htmlFor="account" style={{ marginBottom: 5, display: 'block', fontWeight: 'bold' }}>Select Account:</label>
                 <select
                   id="account"
                   value={selectedAccount}
                   onChange={(e) => setSelectedAccount(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
                 >
                   <option value="">All Accounts</option>
                      {sourceAccounts.map((item) => (
@@ -253,6 +264,7 @@ const Transfers: React.FC = () => {
                 <TableCell>Recipients</TableCell>
               <TableCell>Date</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Type</TableCell> {/* Add Type column */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -271,6 +283,7 @@ const Transfers: React.FC = () => {
                     </TableCell>
                     <TableCell>{format(new Date(transfer.transferDate), 'yyyy-MM-dd')}</TableCell>
                 <TableCell>{transfer.status}</TableCell>
+                <TableCell>{transfer.type}</TableCell> {/* Display transfer type */}
               </TableRow>
             ))}
           </TableBody>
@@ -279,12 +292,13 @@ const Transfers: React.FC = () => {
         <Dialog open={openDialog} onClose={handleCloseDialog}>
             <DialogTitle>Create Transfer</DialogTitle>
             <DialogContent>
-                <FormControl fullWidth margin="dense">
-                    <label htmlFor="sourceAccount">Source Account</label>
+                <FormControl fullWidth margin="dense" style={{ marginBottom: 20 }}>
+                    <label htmlFor="sourceAccount" style={{ marginBottom: 5, display: 'block', fontWeight: 'bold' }}>Source Account</label>
                     <select
                         id="sourceAccount"
                         value={sourceAccount?._id || ""}
                         onChange={(e) => setSourceAccount(sourceAccounts.find(acc => acc._id === e.target.value) || null)}
+                        style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
                     >
                         <option value="">Select Source Account</option>
                         {sourceAccounts.map((account) => (
@@ -303,17 +317,17 @@ const Transfers: React.FC = () => {
                         }
                     }}
                />
-                <div style={{ marginTop: 15}}>
+                <div style={{ marginTop: 15 }}>
                     <h3>Add Recipient Account</h3>
                     <h4>Savings</h4>
                     {accounts.filter(account => account.accountType === 'savings').map((account) => (
-                        <div key={account._id} style={{display: "flex", alignItems: "center", gap: 10}}>
+                        <div key={account._id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <FormControlLabel
-                                control={<input type="checkbox" value={account._id} onChange={(e) => {
+                                control={<input type="checkbox" value={account._id} checked={selectedRecipient.some(r => r._id === account._id)} onChange={(e) => {
                                     if (e.target.checked) {
                                         setSelectedRecipient(prev => [...prev, account]);
                                     } else {
-                                        setSelectedRecipient(prev => prev.filter(r => r._id === account._id));
+                                        setSelectedRecipient(prev => prev.filter(r => r._id !== account._id));
                                     }
                                 }} />}
                                 label={`${account.name} - Balance: ${account.balance}`}
@@ -331,11 +345,11 @@ const Transfers: React.FC = () => {
                     {accounts.filter(account => account.accountType === 'investment').map((account) => (
                         <div key={account._id} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <FormControlLabel
-                                control={<input type="checkbox" value={account._id} onChange={(e) => {
+                                control={<input type="checkbox" value={account._id} checked={selectedRecipient.some(r => r._id === account._id)} onChange={(e) => {
                                     if (e.target.checked) {
                                         setSelectedRecipient(prev => [...prev, account]);
                                     } else {
-                                        setSelectedRecipient(prev => prev.filter(r => r._id === account._id));
+                                        setSelectedRecipient(prev => prev.filter(r => r._id !== account._id));
                                     }
                                 }} />}
                                 label={`${account.name} - Balance: ${account.balance}`}

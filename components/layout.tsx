@@ -26,6 +26,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Button color="inherit" component={Link} href="/transfers">
              Transfers
           </Button>
+          <Button color="inherit" component={Link} href="/loan">
+             Loan Management
+          </Button>
         </Toolbar>
       </AppBar>
       <Container style={{ marginTop: 20, paddingBottom: 20 }}>
