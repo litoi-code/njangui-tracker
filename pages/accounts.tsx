@@ -20,10 +20,19 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmDialog from '../components/ConfirmDialog';
+import Grid from '@mui/material/Grid';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import { styled } from '@mui/material/styles';
+import CircularProgress from '@mui/material/CircularProgress';
 
 interface Account {
     _id: string;
@@ -32,21 +41,33 @@ interface Account {
     accountType: 'checking' | 'savings' | 'investment';
 }
 
+interface Transfer {
+    _id: string;
+    amount: number;
+    date: string;
+    description: string;
+}
+
+const StyledCard = styled(Card)(({ theme }) => ({
+    margin: theme.spacing(2),
+    boxShadow: theme.shadows[3],
+}));
+
 const Accounts: React.FC = () => {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [newAccountName, setNewAccountName] = useState('');
     const [newAccountType, setNewAccountType] = useState<'checking' | 'savings' | 'investment'>('checking');
     const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
     const [openDialog, setOpenDialog] = useState(false);
-    const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-    const [confirmDialogMessage, setConfirmDialogMessage] = useState('');
-    const [confirmDialogAction, setConfirmDialogAction] = useState<string | null>(null);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
     const [filterAccountType, setFilterAccountType] = useState<string>('');
     const [filterAccountName, setFilterAccountName] = useState<string>('');
-
+    const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+    const [selectedAccountDetails, setSelectedAccountDetails] = useState<Account | null>(null);
+    const [recentTransfers, setRecentTransfers] = useState<Transfer[]>([]);
+    const [isLoadingTransfers, setIsLoadingTransfers] = useState(false);
 
     useEffect(() => {
         fetchAccounts();
@@ -64,45 +85,39 @@ const Accounts: React.FC = () => {
         setSelectedAccount(null);
     };
 
-    const handleOpenConfirmDialog = (action: string, account: Account) => {
-        setConfirmDialogMessage(`Are you sure you want to ${action} account ${account.name}?`)
-        setConfirmDialogAction(action);
-        setSelectedAccount(account);
-        setOpenConfirmDialog(true)
-    }
-
-    const handleCloseConfirmDialog = () => {
-        setOpenConfirmDialog(false);
-        setSelectedAccount(null);
-        setConfirmDialogAction(null);
-        setConfirmDialogMessage("");
-    }
-
-    const handleConfirmAction = async () => {
-        if (selectedAccount && confirmDialogAction) {
-            try {
-                switch (confirmDialogAction) {
-                    case 'delete':
-                        await handleDeleteAccount(selectedAccount._id)
-                        break;
-                    case 'reset':
-                        await handleResetAccount(selectedAccount._id)
-                        break;
-                    default:
-                        setSnackbarMessage('Invalid action')
-                        setSnackbarSeverity('error')
-                        setSnackbarOpen(true);
-                        break;
-                }
-            } catch (error) {
-                setSnackbarMessage('There was an error')
-                setSnackbarSeverity('error')
-                setSnackbarOpen(true);
-                console.error(error)
+    const fetchRecentTransfers = async (accountId: string) => {
+        setIsLoadingTransfers(true);
+        try {
+            console.log('Fetching transfers for account:', accountId);
+            const response = await fetch(`/api/accounts/${accountId}/transfers`);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Received transfers:', data);
+                setRecentTransfers(data);
+            } else {
+                const error = await response.json();
+                console.error('Failed to fetch transfers:', error);
+                setRecentTransfers([]);
             }
+        } catch (error) {
+            console.error('Error fetching transfers:', error);
+            setRecentTransfers([]);
+        } finally {
+            setIsLoadingTransfers(false);
         }
-        handleCloseConfirmDialog();
-    }
+    };
+
+    const handleViewDetails = async (account: Account) => {
+        setSelectedAccountDetails(account);
+        setDetailsDialogOpen(true);
+        await fetchRecentTransfers(account._id);
+    };
+
+    const handleCloseDetailsDialog = () => {
+        setDetailsDialogOpen(false);
+        setSelectedAccountDetails(null);
+    };
 
     const fetchAccounts = async () => {
         try {
@@ -191,55 +206,6 @@ const Accounts: React.FC = () => {
             setSnackbarOpen(true);
         }
     };
-    const handleDeleteAccount = async (id: string) => {
-        try {
-            const response = await fetch(`/api/accounts/delete?id=${id}`, {
-                method: 'DELETE',
-            })
-            if (response.ok) {
-                setSnackbarMessage('Account deleted successfully')
-                setSnackbarSeverity('success')
-                fetchAccounts();
-            } else {
-                const errorData = await response.json();
-                setSnackbarMessage(errorData.error || "Failed to delete account");
-                setSnackbarSeverity('error')
-            }
-
-            setSnackbarOpen(true)
-        } catch (error) {
-            console.error('Failed to delete account', error);
-            setSnackbarMessage('Error deleting account');
-            setSnackbarSeverity('error');
-            setSnackbarOpen(true);
-        }
-    }
-
-    const handleResetAccount = async (id: string) => {
-        try {
-            const response = await fetch('/api/accounts/reset', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id })
-            })
-            if (response.ok) {
-                setSnackbarMessage('Account reset successfully')
-                setSnackbarSeverity('success')
-                fetchAccounts();
-            } else {
-                const errorData = await response.json();
-                setSnackbarMessage(errorData.error || "Failed to reset account");
-                setSnackbarSeverity('error')
-            }
-
-            setSnackbarOpen(true)
-        } catch (error) {
-            console.error('Failed to reset account', error);
-            setSnackbarMessage('Error resetting account balance');
-            setSnackbarSeverity('error')
-            setSnackbarOpen(true);
-        }
-    }
 
     const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
@@ -288,7 +254,7 @@ const Accounts: React.FC = () => {
                             <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Name</TableCell> {/* Increased font size and bold */}
                             <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Balance</TableCell> {/* Increased font size and bold */}
                             <TableCell style={{ fontSize: '1.2rem' }}>Account Type</TableCell> {/* Increased font size */}
-                            <TableCell style={{ fontSize: '1.2rem' }}>Actions</TableCell> {/* Increased font size */}
+                            <TableCell style={{ fontSize: '1.2rem' }}>Details</TableCell> {/* Increased font size */}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -305,14 +271,8 @@ const Accounts: React.FC = () => {
                                 </TableCell>
                                 <TableCell>{account.accountType}</TableCell>
                                 <TableCell>
-                                    <IconButton aria-label="edit" onClick={() => handleOpenDialog(account)}>
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton aria-label="delete" onClick={() => handleOpenConfirmDialog('delete', account)}>
-                                        <DeleteIcon />
-                                    </IconButton>
-                                    <IconButton aria-label="reset" onClick={() => handleOpenConfirmDialog('reset', account)}>
-                                        <RefreshIcon />
+                                    <IconButton aria-label="view details" onClick={() => handleViewDetails(account)}>
+                                        <VisibilityIcon />
                                     </IconButton>
                                 </TableCell>
                             </TableRow>
@@ -358,12 +318,100 @@ const Accounts: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <ConfirmDialog
-                open={openConfirmDialog}
-                onClose={handleCloseConfirmDialog}
-                onConfirm={handleConfirmAction}
-                message={confirmDialogMessage}
-            />
+            <Dialog 
+                open={detailsDialogOpen} 
+                onClose={handleCloseDetailsDialog}
+                maxWidth="md"
+                fullWidth
+            >
+                <DialogTitle>
+                    <Typography variant="h5" component="div">
+                        Account Details
+                    </Typography>
+                </DialogTitle>
+                <DialogContent>
+                    {selectedAccountDetails && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <StyledCard>
+                                <CardContent>
+                                    <Typography variant="h6" color="primary" gutterBottom>
+                                        General Information
+                                    </Typography>
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={6}>
+                                            <Typography variant="subtitle1">
+                                                Account Name: {selectedAccountDetails.name}
+                                            </Typography>
+                                            <Typography variant="subtitle1">
+                                                Account Type: {selectedAccountDetails.accountType}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant="h6" color={selectedAccountDetails.balance >= 0 ? 'success.main' : 'error.main'}>
+                                                Balance: ${selectedAccountDetails.balance}
+                                            </Typography>
+                                            <Typography variant="caption" color="textSecondary">
+                                                ID: {selectedAccountDetails._id}
+                                            </Typography>
+                                        </Grid>
+                                    </Grid>
+                                </CardContent>
+                            </StyledCard>
+
+                            <StyledCard>
+                                <CardContent>
+                                    <Typography variant="h6" color="primary" gutterBottom>
+                                        Transfer History
+                                    </Typography>
+                                    {isLoadingTransfers ? (
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                                            <CircularProgress />
+                                        </Box>
+                                    ) : (
+                                        <List>
+                                            {recentTransfers.length > 0 ? (
+                                                recentTransfers.map((transfer) => (
+                                                    <React.Fragment key={transfer._id}>
+                                                        <ListItem>
+                                                            <ListItemText
+                                                                primary={
+                                                                    <Typography variant="body1">
+                                                                        ${Math.abs(transfer.amount).toFixed(2)}
+                                                                    </Typography>
+                                                                }
+                                                                secondary={
+                                                                    <>
+                                                                        <Typography variant="body2" color="textSecondary">
+                                                                            {transfer.description}
+                                                                        </Typography>
+                                                                        <Typography variant="caption" color="textSecondary">
+                                                                            {new Date(transfer.date).toLocaleString()}
+                                                                        </Typography>
+                                                                    </>
+                                                                }
+                                                            />
+                                                        </ListItem>
+                                                        <Divider />
+                                                    </React.Fragment>
+                                                ))
+                                            ) : (
+                                                <Typography variant="body2" color="textSecondary" sx={{ p: 2 }}>
+                                                    No recent transfers
+                                                </Typography>
+                                            )}
+                                        </List>
+                                    )}
+                                </CardContent>
+                            </StyledCard>
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDetailsDialog} color="primary">
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
                 <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
                     {snackbarMessage}
