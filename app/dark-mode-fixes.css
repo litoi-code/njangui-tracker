@@ -1,0 +1,192 @@
+/* Dark mode specific fixes */
+
+/* Fix for select dropdowns in dark mode */
+.dark select option {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+/* Fix for date inputs in dark mode */
+.dark input[type="date"],
+.dark input[type="datetime-local"],
+.dark input[type="month"],
+.dark input[type="time"] {
+  color-scheme: dark;
+}
+
+/* Fix for number inputs in dark mode */
+.dark input[type="number"] {
+  color-scheme: dark;
+}
+
+/* Fix for checkboxes and radio buttons in dark mode */
+.dark input[type="checkbox"],
+.dark input[type="radio"] {
+  background-color: #1e293b;
+  border-color: #475569;
+}
+
+/* Fix for placeholder text in dark mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* Fix for disabled inputs in dark mode */
+.dark input:disabled,
+.dark select:disabled,
+.dark textarea:disabled {
+  background-color: #334155;
+  color: #94a3b8;
+}
+
+/* Fix for focus states in dark mode */
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Fix for table hover states in dark mode */
+.dark tr:hover td {
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+/* Fix for card hover states in dark mode */
+.dark .card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Fix for modal backgrounds in dark mode */
+.dark .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Fix for tooltips in dark mode */
+.dark [data-tooltip]:hover::after {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+/* Fix for scrollbars in dark mode */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Fix for alerts and notifications in dark mode */
+.dark .bg-red-100 {
+  background-color: rgba(220, 38, 38, 0.2);
+}
+
+.dark .bg-yellow-100 {
+  background-color: rgba(234, 179, 8, 0.2);
+}
+
+.dark .bg-green-100 {
+  background-color: rgba(22, 163, 74, 0.2);
+}
+
+.dark .bg-blue-100 {
+  background-color: rgba(37, 99, 235, 0.2);
+}
+
+.dark .border-red-400 {
+  border-color: rgba(220, 38, 38, 0.5);
+}
+
+.dark .border-yellow-400 {
+  border-color: rgba(234, 179, 8, 0.5);
+}
+
+.dark .border-green-400 {
+  border-color: rgba(22, 163, 74, 0.5);
+}
+
+.dark .border-blue-400 {
+  border-color: rgba(37, 99, 235, 0.5);
+}
+
+.dark .text-red-700 {
+  color: rgba(248, 113, 113, 1);
+}
+
+.dark .text-yellow-700 {
+  color: rgba(253, 224, 71, 1);
+}
+
+.dark .text-green-700 {
+  color: rgba(134, 239, 172, 1);
+}
+
+.dark .text-blue-700 {
+  color: rgba(147, 197, 253, 1);
+}
+
+/* Fix for status badges in dark mode */
+.dark .bg-gray-50 {
+  background-color: rgba(30, 41, 59, 0.5);
+}
+
+.dark .bg-gray-100 {
+  background-color: rgba(30, 41, 59, 0.8);
+}
+
+/* Fix for table headers in dark mode */
+.dark thead {
+  background-color: rgba(30, 41, 59, 0.8);
+}
+
+.dark th {
+  color: rgba(248, 250, 252, 0.8);
+}
+
+/* Fix for form labels in dark mode */
+.dark label {
+  color: rgba(248, 250, 252, 0.8);
+}
+
+/* Fix for links in dark mode */
+.dark a {
+  color: #3b82f6;
+}
+
+.dark a:hover {
+  color: #60a5fa;
+}
+
+/* Fix for borders in dark mode */
+.dark .border {
+  border-color: rgba(51, 65, 85, 1);
+}
+
+.dark .border-t,
+.dark .border-b,
+.dark .border-l,
+.dark .border-r {
+  border-color: rgba(51, 65, 85, 1);
+}
+
+/* Fix for dividers in dark mode */
+.dark .divide-y > * + * {
+  border-top-color: rgba(51, 65, 85, 1);
+}
+
+.dark .divide-x > * + * {
+  border-left-color: rgba(51, 65, 85, 1);
+}
