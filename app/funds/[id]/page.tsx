@@ -41,19 +41,19 @@ export default function FundDetailPage() {
         // Fetch fund details
         const fundResponse = await fetch(`/api/funds/${params.id}`);
         const fundResult = await fundResponse.json();
-        
+
         if (!fundResult.success) {
           setError(fundResult.error || 'Failed to fetch fund details');
           setLoading(false);
           return;
         }
-        
+
         setFund(fundResult.data);
-        
+
         // Fetch fund contributions
         const contributionsResponse = await fetch(`/api/contributions?fund=${params.id}`);
         const contributionsResult = await contributionsResponse.json();
-        
+
         if (contributionsResult.success) {
           setContributions(contributionsResult.data);
         }
@@ -78,7 +78,7 @@ export default function FundDetailPage() {
         method: 'DELETE',
       });
       const result = await response.json();
-      
+
       if (result.success) {
         router.push('/funds');
       } else {
@@ -145,7 +145,7 @@ export default function FundDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="text-sm font-medium text-blue-800 mb-1">Total Amount</h3>
-              <p className="text-2xl font-bold text-blue-900">${fund.totalAmount.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-blue-900">{fund.totalAmount.toFixed(2)} XAF</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
               <h3 className="text-sm font-medium text-green-800 mb-1">Interest Rate</h3>
@@ -153,19 +153,19 @@ export default function FundDetailPage() {
             </div>
             <div className="bg-purple-50 p-4 rounded-lg">
               <h3 className="text-sm font-medium text-purple-800 mb-1">Projected Interest</h3>
-              <p className="text-2xl font-bold text-purple-900">${projectedInterest.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-purple-900">{projectedInterest.toFixed(2)} XAF</p>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-200 px-6 py-4 bg-gray-50 flex justify-between">
-          <Link 
+          <Link
             href={`/funds/${fund._id}/edit`}
             className="text-blue-500 hover:text-blue-700"
           >
             Edit Fund
           </Link>
-          <button 
+          <button
             onClick={handleDelete}
             className="text-red-500 hover:text-red-700"
           >
@@ -177,7 +177,7 @@ export default function FundDetailPage() {
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h2 className="text-xl font-semibold">Contribution History</h2>
-          <Link 
+          <Link
             href={`/contributions/new?fund=${fund._id}`}
             className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
           >
@@ -208,7 +208,7 @@ export default function FundDetailPage() {
                         {contribution.member.name}
                       </Link>
                     </td>
-                    <td className="py-3 px-4 text-right">${contribution.amount.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-right">{contribution.amount.toFixed(2)} XAF</td>
                   </tr>
                 ))}
               </tbody>

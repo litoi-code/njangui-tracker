@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 interface Member {
   _id: string;
@@ -12,19 +11,20 @@ interface Member {
 }
 
 export default function NewPenaltyPage() {
-  const router = useRouter();
   const [formData, setFormData] = useState({
     amount: 0,
     reason: '',
+    customReason: '',
     date: new Date().toISOString().split('T')[0],
     member: '',
     status: 'pending'
   });
-  
+
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function NewPenaltyPage() {
       try {
         const response = await fetch('/api/members');
         const result = await response.json();
-        
+
         if (result.success) {
           setMembers(result.data);
         } else {
@@ -51,12 +51,17 @@ export default function NewPenaltyPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
+
+    // Clear success message when form is modified
+    if (successMessage) {
+      setSuccessMessage('');
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: name === 'amount' ? parseFloat(value) || 0 : value
     }));
-    
+
     // Update selected member
     if (name === 'member') {
       const member = members.find(m => m._id === value);
@@ -68,39 +73,76 @@ export default function NewPenaltyPage() {
     e.preventDefault();
     setSubmitting(true);
     setError('');
-    
+    setSuccessMessage('');
+
     // Validate form data
     if (formData.amount <= 0) {
       setError('Amount must be greater than zero');
       setSubmitting(false);
       return;
     }
-    
+
     if (!formData.reason.trim()) {
-      setError('Please provide a reason for the penalty');
+      setError('Please select a reason for the penalty');
       setSubmitting(false);
       return;
     }
-    
+
+    // If "Autre" is selected but no custom reason is provided
+    if (formData.reason === 'Autre' && !formData.customReason.trim()) {
+      setError('Please provide a custom reason for the penalty');
+      setSubmitting(false);
+      return;
+    }
+
     if (!formData.member) {
       setError('Please select a member');
       setSubmitting(false);
       return;
     }
-    
+
     try {
+      // Prepare the data to send, using customReason if "Autre" is selected
+      const dataToSend = {
+        amount: formData.amount,
+        date: formData.date,
+        member: formData.member,
+        status: formData.status,
+        // If "Autre" is selected, use the custom reason instead
+        reason: formData.reason === 'Autre' ? formData.customReason : formData.reason
+      };
+
       const response = await fetch('/api/penalties', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
-        router.push('/penalties');
+        // Get the member name for the success message
+        const memberName = selectedMember?.name || 'member';
+
+        // Show success message
+        setSuccessMessage(`Successfully created penalty of ${formData.amount.toFixed(2)} XAF for ${memberName}`);
+
+        // Reset form to initial state but keep the same member selected
+        const currentMemberId = formData.member;
+
+        setFormData({
+          amount: 0,
+          reason: '',
+          customReason: '',
+          date: new Date().toISOString().split('T')[0],
+          member: currentMemberId, // Keep the same member selected
+          status: 'pending'
+        });
+
+        // Scroll to the top of the form to show the success message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setError(result.error || 'Failed to create penalty');
       }
@@ -130,19 +172,30 @@ export default function NewPenaltyPage() {
           Back to Penalties
         </Link>
       </div>
-      
+
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h1 className="text-2xl font-bold">New Penalty</h1>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-6">
           {error && (
             <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <p className="text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
-          
+
+          {successMessage && (
+            <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <p className="text-green-600 dark:text-green-400 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                {successMessage}
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <div className="mb-4">
@@ -164,26 +217,26 @@ export default function NewPenaltyPage() {
                     </option>
                   ))}
                 </select>
-                
+
                 {selectedMember && (
                   <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                     <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Current Balance: 
+                      Current Balance:
                       <span className={`ml-1 font-medium ${selectedMember.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                        ${selectedMember.balance.toFixed(2)}
+                        {selectedMember.balance.toFixed(2)} XAF
                       </span>
                     </p>
                   </div>
                 )}
               </div>
-              
+
               <div className="mb-4">
                 <label htmlFor="amount" className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
                   Amount *
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">
-                    $
+                    XAF
                   </span>
                   <input
                     type="number"
@@ -198,7 +251,7 @@ export default function NewPenaltyPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <label htmlFor="date" className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
                   Date
@@ -212,7 +265,7 @@ export default function NewPenaltyPage() {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
-              
+
               <div className="mb-4">
                 <label htmlFor="status" className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
                   Status
@@ -232,34 +285,57 @@ export default function NewPenaltyPage() {
                 </p>
               </div>
             </div>
-            
+
             <div>
               <div className="mb-4">
                 <label htmlFor="reason" className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
                   Reason *
                 </label>
-                <textarea
+                <select
                   id="reason"
                   name="reason"
                   value={formData.reason}
                   onChange={handleChange}
-                  rows={6}
                   required
-                  placeholder="Explain the reason for this penalty..."
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                ></textarea>
+                >
+                  <option value="">Select a reason</option>
+                  <option value="Retard réunion">Retard réunion</option>
+                  <option value="Retard cotisation">Retard cotisation</option>
+                  <option value="Trouble">Trouble</option>
+                  <option value="Autre">Autre</option>
+                </select>
               </div>
-              
+
+              {/* Show custom reason input if "Autre" is selected */}
+              {formData.reason === 'Autre' && (
+                <div className="mb-4">
+                  <label htmlFor="customReason" className="block text-gray-700 dark:text-gray-300 font-medium mb-2">
+                    Custom Reason *
+                  </label>
+                  <textarea
+                    id="customReason"
+                    name="customReason"
+                    value={formData.customReason}
+                    onChange={handleChange}
+                    rows={4}
+                    required
+                    placeholder="Explain the custom reason for this penalty..."
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  ></textarea>
+                </div>
+              )}
+
               <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
                 <h3 className="text-yellow-800 dark:text-yellow-400 font-medium mb-2">Important Note</h3>
                 <p className="text-yellow-700 dark:text-yellow-300 text-sm">
-                  Penalties are used to enforce group rules and maintain discipline. When a penalty is marked as "Paid", 
+                  Penalties are used to enforce group rules and maintain discipline. When a penalty is marked as "Paid",
                   the amount will be deducted from the member's balance and recorded as a transaction.
                 </p>
               </div>
             </div>
           </div>
-          
+
           <div className="mt-6 flex justify-end">
             <Link
               href="/penalties"

@@ -257,21 +257,25 @@ export default function LoansPage() {
                 {loans.map((loan) => (
                   <tr key={loan._id} className="hover:bg-gray-50">
                     <td className="py-3 px-4 whitespace-nowrap">
-                      <Link href={`/members/${loan.member._id}`} className="text-blue-500 hover:underline">
-                        {loan.member.name}
-                      </Link>
+                      {loan.member ? (
+                        <Link href={`/members/${loan.member._id}`} className="text-blue-500 hover:underline">
+                          {loan.member.name || 'Unknown Member'}
+                        </Link>
+                      ) : (
+                        <span className="text-gray-500">Unknown Member</span>
+                      )}
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap">${loan.amount.toFixed(2)}</td>
-                    <td className="py-3 px-4 whitespace-nowrap">{loan.interestRate}%</td>
-                    <td className="py-3 px-4 whitespace-nowrap">{formatDate(loan.startDate)}</td>
-                    <td className="py-3 px-4 whitespace-nowrap">{formatDate(loan.dueDate)}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">${(loan.amount || 0).toFixed(2)}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">{(loan.interestRate || 0)}%</td>
+                    <td className="py-3 px-4 whitespace-nowrap">{loan.startDate ? formatDate(loan.startDate) : 'N/A'}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">{loan.dueDate ? formatDate(loan.dueDate) : 'N/A'}</td>
                     <td className="py-3 px-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 rounded text-xs ${getStatusColor(loan.status)}`}>
-                        {loan.status}
+                      <span className={`px-2 py-1 rounded text-xs ${getStatusColor(loan.status || 'pending')}`}>
+                        {loan.status || 'pending'}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right whitespace-nowrap">
-                      ${loan.remainingAmount.toFixed(2)}
+                      ${(loan.remainingAmount || 0).toFixed(2)}
                     </td>
                     <td className="py-3 px-4 text-center whitespace-nowrap">
                       <div className="flex justify-center space-x-2">

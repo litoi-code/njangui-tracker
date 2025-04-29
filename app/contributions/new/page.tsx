@@ -27,7 +27,7 @@ export default function NewContributionPage() {
   const searchParams = useSearchParams();
   // Set August 31, 2024 as the default date
   // Using a direct string to avoid timezone issues
-  const defaultDateString = '2024-08-31'; // Format: YYYY-MM-DD
+  const defaultDateString = '2024-11-30'; // Format: YYYY-MM-DD
 
   const [formData, setFormData] = useState({
     // date: new Date().toISOString().split('T')[0],
@@ -90,7 +90,7 @@ export default function NewContributionPage() {
             if (fetchedMembers.length >= 2) {
               setFormData(prev => ({
                 ...prev,
-                host: fetchedMembers[1]._id
+                host: fetchedMembers[6]._id
               }));
             }
 
@@ -233,12 +233,10 @@ export default function NewContributionPage() {
 
     // Inform if balance is insufficient, but don't block submission
     if (insufficientBalance) {
-      // Calculate the projected balance safely
       const currentBalance = selectedMember?.balance || 0;
-      const projectedBalance = currentBalance - totalAmount;
 
       const confirmContinue = confirm(
-        `Note: The member's balance ($${currentBalance.toFixed(2)}) is less than the total contribution amount ($${totalAmount.toFixed(2)}). The balance will become negative ($${projectedBalance.toFixed(2)}). Do you want to continue?`
+        `Note: The member's balance (${currentBalance.toFixed(2)} XAF) is less than the total contribution amount (${totalAmount.toFixed(2)} XAF). Do you want to continue?`
       );
 
       if (!confirmContinue) {
@@ -272,7 +270,7 @@ export default function NewContributionPage() {
       if (result.success) {
         // Show success message with contributor's name
         const contributorName = selectedMember?.name || 'member';
-        setSuccessMessage(`Successfully created ${nonZeroContributions.length} contribution(s) for ${contributorName} totaling $${totalAmount.toFixed(2)}`);
+        setSuccessMessage(`Successfully created ${nonZeroContributions.length} contribution(s) for ${contributorName} totaling ${totalAmount.toFixed(2)} XAF`);
 
         // Clear error message if there was one
         setError('');
@@ -304,7 +302,7 @@ export default function NewContributionPage() {
 
               // Update the success message with the latest member name
               const updatedMemberName = result.data.name || selectedMember?.name || 'member';
-              setSuccessMessage(`Successfully created ${nonZeroContributions.length} contribution(s) for ${updatedMemberName} totaling $${totalAmount.toFixed(2)}`);
+              setSuccessMessage(`Successfully created ${nonZeroContributions.length} contribution(s) for ${updatedMemberName} totaling ${totalAmount.toFixed(2)} XAF`);
 
               // Check if the member has sufficient balance for the new contribution
               setInsufficientBalance(newTotal > result.data.balance);
@@ -381,7 +379,7 @@ export default function NewContributionPage() {
                 Total Contribution Amount:
               </div>
               <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">
-                ${totalAmount.toFixed(2)}
+                {totalAmount.toFixed(2)} XAF
               </div>
             </div>
 
@@ -391,30 +389,8 @@ export default function NewContributionPage() {
                   Member's Current Balance:
                 </div>
                 <div className={selectedMember.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                  ${selectedMember.balance.toFixed(2)}
+                  {selectedMember.balance.toFixed(2)} XAF
                 </div>
-              </div>
-            )}
-
-            {selectedMember && (
-              <div className="mt-2 flex justify-between items-center text-sm">
-                <div className="text-gray-600 dark:text-gray-400">
-                  Projected Balance After Contribution:
-                </div>
-                <div className={selectedMember.balance - totalAmount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                  ${(selectedMember.balance - totalAmount).toFixed(2)}
-                </div>
-              </div>
-            )}
-
-            {insufficientBalance && (
-              <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                <p className="text-blue-700 dark:text-blue-400 text-sm flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  Note: Total contribution amount exceeds member's current balance. The member's balance will become negative, which is allowed.
-                </p>
               </div>
             )}
           </div>
@@ -447,7 +423,7 @@ export default function NewContributionPage() {
                   <p className="text-sm text-gray-600 dark:text-gray-300">
                     Current Balance:
                     <span className={`ml-1 font-medium ${selectedMember.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      ${selectedMember.balance.toFixed(2)}
+                      {selectedMember.balance.toFixed(2)} XAF
                     </span>
                   </p>
                 </div>
@@ -521,10 +497,10 @@ export default function NewContributionPage() {
                         </span>
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        Balance: ${fund.totalAmount.toFixed(2)}
+                        Balance: {fund.totalAmount.toFixed(2)} XAF
                         {amount > 0 && (
                           <span className="ml-1 text-green-600 dark:text-green-400">
-                            (+${amount.toFixed(2)})
+                            (+{amount.toFixed(2)} XAF)
                           </span>
                         )}
                       </div>
@@ -532,7 +508,7 @@ export default function NewContributionPage() {
 
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 dark:text-gray-400">
-                        $
+                        XAF
                       </span>
                       <input
                         type="number"

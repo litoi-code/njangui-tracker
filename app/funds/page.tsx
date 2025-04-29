@@ -24,7 +24,7 @@ export default function FundsPage() {
       try {
         const response = await fetch('/api/funds');
         const result = await response.json();
-        
+
         if (result.success) {
           setFunds(result.data);
         } else {
@@ -51,7 +51,7 @@ export default function FundsPage() {
         method: 'DELETE',
       });
       const result = await response.json();
-      
+
       if (result.success) {
         setFunds(funds.filter(fund => fund._id !== id));
       } else {
@@ -75,8 +75,8 @@ export default function FundsPage() {
     <div className="py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Funds</h1>
-        <Link 
-          href="/funds/new" 
+        <Link
+          href="/funds/new"
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
         >
           Add New Fund
@@ -102,11 +102,11 @@ export default function FundsPage() {
                     {fund.type}
                   </span>
                 </div>
-                
+
                 <p className="text-gray-600 mb-4 line-clamp-2">
                   {fund.description || 'No description provided.'}
                 </p>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Interest Rate:</span>
@@ -114,26 +114,26 @@ export default function FundsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Amount:</span>
-                    <span className="font-semibold">${fund.totalAmount.toFixed(2)}</span>
+                    <span className="font-semibold">{fund.totalAmount.toFixed(2)} XAF</span>
                   </div>
                 </div>
               </div>
-              
+
               <div className="border-t border-gray-200 px-6 py-3 bg-gray-50 flex justify-between">
-                <Link 
+                <Link
                   href={`/funds/${fund._id}`}
                   className="text-blue-500 hover:text-blue-700"
                 >
                   View Details
                 </Link>
                 <div className="flex space-x-4">
-                  <Link 
+                  <Link
                     href={`/funds/${fund._id}/edit`}
                     className="text-blue-500 hover:text-blue-700"
                   >
                     Edit
                   </Link>
-                  <button 
+                  <button
                     onClick={() => handleDelete(fund._id)}
                     className="text-red-500 hover:text-red-700"
                   >

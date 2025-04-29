@@ -41,11 +41,11 @@ export default function ContributionsPage() {
   const [fundTotals, setFundTotals] = useState<{ [key: string]: { amount: number; name: string; id: string; type?: string } }>({});
   const [uniqueContributorsCount, setUniqueContributorsCount] = useState(0);
 
-  // Filter state
+  // Filter state with no default date
   const [filters, setFilters] = useState<FilterOptions>({
     member: '',
     fund: '',
-    date: ''
+    date: '' // No default date
   });
 
   // Sorting state
@@ -291,7 +291,7 @@ export default function ContributionsPage() {
     setFilters({
       member: '',
       fund: '',
-      date: ''
+      date: '' // Reset to empty date
     });
   };
 
@@ -377,7 +377,7 @@ export default function ContributionsPage() {
               <div>
                 <div className="text-xs font-medium text-gray-500 dark:text-gray-400">Total</div>
                 <div className="text-lg font-bold text-gray-900 dark:text-white">
-                  ${totalAmount.toFixed(2)}
+                  {totalAmount.toFixed(2)} XAF
                   <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">({filteredContributions.length})</span>
                 </div>
               </div>
@@ -392,7 +392,7 @@ export default function ContributionsPage() {
                     Top Two Sum
                   </div>
                   <div className="text-lg font-bold text-gray-900 dark:text-white">
-                    ${topTwoFundsSum.toFixed(2)}
+                    {topTwoFundsSum.toFixed(2)} XAF
                     <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">
                       ({totalAmount > 0 ? Math.round(topTwoFundsSum / totalAmount * 100) : 0}%)
                     </span>
@@ -417,9 +417,8 @@ export default function ContributionsPage() {
             )}
           </div>
         </div>
-      </div>
 
-      {/* Fund Total Cards */}
+        {/* Fund Total Cards */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-semibold">Fund Totals</h2>
@@ -490,7 +489,7 @@ export default function ContributionsPage() {
                         )}
                       </div>
                       <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        ${fund.amount.toFixed(2)}
+                        {fund.amount.toFixed(2)} XAF
                       </div>
                       <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -508,9 +507,171 @@ export default function ContributionsPage() {
           })()}
         </div>
       </div>
+      
+        {/* Filters - Moved here between statistics and fund totals */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+          <div className="flex flex-col md:flex-row md:items-end md:space-x-4">
+            <div className="flex-1 mb-4 md:mb-0">
+              <label htmlFor="member" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Member
+              </label>
+              <select
+                id="member"
+                name="member"
+                value={filters.member}
+                onChange={handleFilterChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">All Members</option>
+                {members.map(member => (
+                  <option key={member._id} value={member._id}>{member.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex-1 mb-4 md:mb-0">
+              <label htmlFor="fund" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Fund
+              </label>
+              <select
+                id="fund"
+                name="fund"
+                value={filters.fund}
+                onChange={handleFilterChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">All Funds</option>
+                {funds.map(fund => (
+                  <option key={fund._id} value={fund._id}>{fund.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex-1 mb-4 md:mb-0">
+              <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Date
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"></path>
+                  </svg>
+                </div>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={filters.date}
+                  onChange={handleFilterChange}
+                  className="w-full pl-10 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Select date"
+                />
+                {filters.date && (
+                  <button
+                    type="button"
+                    onClick={() => setFilters(prev => ({ ...prev, date: '' }))}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    title="Clear date"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="md:ml-2 flex justify-end md:self-end">
+              <button
+                onClick={resetFilters}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
+              >
+                Reset Filters
+              </button>
+            </div>
+          </div>
+
+          {/* Active Filters Indicators */}
+          {(filters.fund || filters.member || filters.date) && (
+            <div className="mt-4 flex flex-wrap items-center gap-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-center mr-2">
+                <span className="mr-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <span className="text-blue-700 dark:text-blue-300 font-medium">
+                  Active Filters:
+                </span>
+              </div>
+
+              {filters.fund && (
+                <div className="flex items-center bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 mr-2">
+                    Fund: <strong>{funds.find(f => f._id === filters.fund)?.name}</strong>
+                  </span>
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, fund: '' }))}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              {filters.member && (
+                <div className="flex items-center bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 mr-2">
+                    Member: <strong>{members.find(m => m._id === filters.member)?.name}</strong>
+                  </span>
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, member: '' }))}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              {filters.date && (
+                <div className="flex items-center bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 mr-2">
+                    Date: <strong>{new Date(filters.date).toLocaleDateString()}</strong>
+                  </span>
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, date: '' }))}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    title="Clear date"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              <button
+                onClick={resetFilters}
+                className="ml-auto text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                </svg>
+                Reset All Filters
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+      {/* <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
         <div className="flex flex-col md:flex-row md:items-end md:space-x-4">
           <div className="flex-1 mb-4 md:mb-0">
             <label htmlFor="member" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -574,8 +735,8 @@ export default function ContributionsPage() {
                   className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                   title="Clear date"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
               )}
@@ -591,82 +752,9 @@ export default function ContributionsPage() {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Contributions Table */}
-      {/* Active Filters Indicators */}
-      {(filters.fund || filters.member || filters.date) && (
-        <div className="mb-4 flex flex-wrap items-center gap-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-          <div className="flex items-center mr-2">
-            <span className="mr-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
-              </svg>
-            </span>
-            <span className="text-blue-700 dark:text-blue-300 font-medium">
-              Active Filters:
-            </span>
-          </div>
-
-          {filters.fund && (
-            <div className="flex items-center bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
-              <span className="text-sm text-gray-700 dark:text-gray-300 mr-2">
-                Fund: <strong>{funds.find(f => f._id === filters.fund)?.name}</strong>
-              </span>
-              <button
-                onClick={() => setFilters(prev => ({ ...prev, fund: '' }))}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          )}
-
-          {filters.member && (
-            <div className="flex items-center bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
-              <span className="text-sm text-gray-700 dark:text-gray-300 mr-2">
-                Member: <strong>{members.find(m => m._id === filters.member)?.name}</strong>
-              </span>
-              <button
-                onClick={() => setFilters(prev => ({ ...prev, member: '' }))}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          )}
-
-          {filters.date && (
-            <div className="flex items-center bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
-              <span className="text-sm text-gray-700 dark:text-gray-300 mr-2">
-                Date: <strong>{new Date(filters.date).toLocaleDateString()}</strong>
-              </span>
-              <button
-                onClick={() => setFilters(prev => ({ ...prev, date: '' }))}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            </div>
-          )}
-
-          <button
-            onClick={resetFilters}
-            className="ml-auto text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm flex items-center"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
-            </svg>
-            Reset All Filters
-          </button>
-        </div>
-      )}
 
       {filteredContributions.length === 0 ? (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
@@ -763,7 +851,7 @@ export default function ContributionsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
-                      ${contribution.amount.toFixed(2)}
+                      {contribution.amount.toFixed(2)} XAF
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex justify-center space-x-2">
@@ -784,21 +872,104 @@ export default function ContributionsPage() {
                   </tr>
                 ))}
               </tbody>
-              <tfoot className="bg-gray-50 dark:bg-gray-700">
+              {/* <tfoot className="bg-gray-50 dark:bg-gray-700">
                 <tr>
                   <td colSpan={3} className="px-6 py-4 text-right font-medium">
                     Total:
                   </td>
                   <td className="px-6 py-4 text-right font-bold">
-                    ${totalAmount.toFixed(2)}
+                    {totalAmount.toFixed(2)} XAF
                   </td>
                   <td></td>
                 </tr>
-              </tfoot>
+              </tfoot> */}
             </table>
           </div>
         </div>
       )}
+      {/* Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-end md:space-x-4">
+          <div className="flex-1 mb-4 md:mb-0">
+            <label htmlFor="member" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Member
+            </label>
+            <select
+              id="member"
+              name="member"
+              value={filters.member}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">All Members</option>
+              {members.map(member => (
+                <option key={member._id} value={member._id}>{member.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex-1 mb-4 md:mb-0">
+            <label htmlFor="fund" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Fund
+            </label>
+            <select
+              id="fund"
+              name="fund"
+              value={filters.fund}
+              onChange={handleFilterChange}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">All Funds</option>
+              {funds.map(fund => (
+                <option key={fund._id} value={fund._id}>{fund.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex-1 mb-4 md:mb-0">
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Date
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd"></path>
+                </svg>
+              </div>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                value={filters.date}
+                onChange={handleFilterChange}
+                className="w-full pl-10 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="Select date"
+              />
+              {filters.date && (
+                <button
+                  type="button"
+                  onClick={() => setFilters(prev => ({ ...prev, date: '' }))}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  title="Clear date"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="md:ml-2 flex justify-end md:self-end">
+            <button
+              onClick={resetFilters}
+              className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors whitespace-nowrap"
+            >
+              Reset Filters
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -198,7 +198,7 @@ export default function MembersPage() {
                   </td>
                   <td className="py-2 px-4 border-b dark:border-gray-600 text-right">
                     <span className={member.balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                      ${member.balance.toFixed(2)}
+                      {member.balance.toFixed(2)} XAF
                     </span>
                   </td>
                   <td className="py-2 px-4 border-b dark:border-gray-600 text-center">

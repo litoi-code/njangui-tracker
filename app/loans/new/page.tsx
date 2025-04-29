@@ -22,12 +22,17 @@ export default function NewLoanPage() {
   const searchParams = useSearchParams();
   const [members, setMembers] = useState<Member[]>([]);
   const [funds, setFunds] = useState<Fund[]>([]);
+  // Calculate default dates safely
+  const today = new Date();
+  const nextYear = new Date(today);
+  nextYear.setFullYear(today.getFullYear() + 1);
+
   const [formData, setFormData] = useState({
     amount: 0,
     interestRate: 5,
-    startDate: new Date().toISOString().split('T')[0],
+    startDate: today.toISOString().split('T')[0],
     // Set default due date to 1 year from start date (will be sent to API but not shown in form)
-    dueDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    dueDate: nextYear.toISOString().split('T')[0],
     status: 'pending',
     member: searchParams.get('member') || '',
     fund: searchParams.get('fund') || ''
@@ -126,11 +131,23 @@ export default function NewLoanPage() {
       };
 
       // If start date changes, update due date to be 1 year from start date
-      if (name === 'startDate') {
-        const startDate = new Date(value);
-        const dueDate = new Date(startDate);
-        dueDate.setFullYear(dueDate.getFullYear() + 1);
-        updatedData.dueDate = dueDate.toISOString().split('T')[0];
+      if (name === 'startDate' && value) {
+        try {
+          const startDate = new Date(value);
+
+          // Check if the date is valid
+          if (!isNaN(startDate.getTime())) {
+            const dueDate = new Date(startDate);
+            dueDate.setFullYear(dueDate.getFullYear() + 1);
+            updatedData.dueDate = dueDate.toISOString().split('T')[0];
+          } else {
+            // If date is invalid, keep the previous due date
+            console.warn('Invalid start date provided');
+          }
+        } catch (err) {
+          console.error('Error calculating due date:', err);
+          // Keep the previous due date in case of error
+        }
       }
 
       return updatedData;

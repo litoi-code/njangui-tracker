@@ -182,7 +182,7 @@ export default function MemberDetailPage() {
                 <p>
                   <span className="font-medium">Balance:</span>
                   <span className={member.balance >= 0 ? 'text-green-600 ml-2' : 'text-red-600 ml-2'}>
-                    ${member.balance.toFixed(2)}
+                    {member.balance.toFixed(2)} XAF
                   </span>
                 </p>
               </div>
@@ -255,7 +255,7 @@ export default function MemberDetailPage() {
                          transaction.type === 'withdrawal' || transaction.type === 'repayment' ||
                          transaction.type === 'contribution' || transaction.type === 'penalty' ? '-' :
                          ''}
-                        ${transaction.amount.toFixed(2)}
+                        {transaction.amount.toFixed(2)} XAF
                       </span>
                     </td>
                   </tr>
